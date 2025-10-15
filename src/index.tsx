@@ -5,7 +5,9 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import Login from './components/Login';
 import Register from './components/Register';
+import ProtectedRoute from './components/ProtectedRoute';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import OpticienList from './components/OpticienList';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -16,6 +18,16 @@ root.render(
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/opticiens" element={<OpticienList />} />
+        {/* Protected Routes */}
+        <Route
+          path="/opticiens"
+          element={
+            <ProtectedRoute>
+              <OpticienList />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/app" element={<App />} />
       </Routes>
     </BrowserRouter>

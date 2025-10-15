@@ -9,6 +9,14 @@ interface RegisterData {
   prenom: string;
   telephone?: string;
   city?: string;
+  adresse?: string;
+  companyName?: string;
+  ICE?: string;
+}
+
+interface UploadedImage {
+  file: File;
+  preview: string;
 }
 
 const Register: React.FC = () => {
@@ -19,6 +27,9 @@ const Register: React.FC = () => {
     prenom: '',
     telephone: '',
     city: '',
+    adresse: '',
+    companyName: '',
+    ICE: '',
   });
 
   const [error, setError] = useState<string>('');
@@ -27,6 +38,7 @@ const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<string>('');
   const [phoneError, setPhoneError] = useState<string>('');
+  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -81,7 +93,31 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/register-opticien', formData);
+      // Create FormData to handle file uploads
+      const submitData = new FormData();
+      
+      // Add all form fields
+      submitData.append('email', formData.email);
+      submitData.append('password', formData.password);
+      submitData.append('nom', formData.nom);
+      submitData.append('prenom', formData.prenom);
+      submitData.append('telephone', formData.telephone || '');
+      submitData.append('city', formData.city || '');
+      submitData.append('adresse', formData.adresse || '');
+      submitData.append('companyName', formData.companyName || '');
+      submitData.append('ICE', formData.ICE || '');
+      
+      // Add uploaded images
+      uploadedImages.forEach((img) => {
+        submitData.append('images[]', img.file);
+      });
+
+      const response = await api.post('/register-opticien', submitData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      
       setSuccess(response.data.message || 'Inscription réussie ! Redirection...');
       
       // Redirect to login after 2 seconds
@@ -254,6 +290,131 @@ const Register: React.FC = () => {
                 />
               </div>
             </div>
+
+            {/* Company Fields - Two Columns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
+                  Nom de l'entreprise
+                </label>
+                <input
+                  id="companyName"
+                  type="text"
+                  name="companyName"
+                  placeholder="Optique Dupont"
+                  value={formData.companyName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 outline-none"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="ICE" className="block text-sm font-medium text-gray-700 mb-2">
+                  Numéro ICE
+                </label>
+                <input
+                  id="ICE"
+                  type="text"
+                  name="ICE"
+                  placeholder="Identifiant Commercial Établissement"
+                  value={formData.ICE}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 outline-none"
+                />
+              </div>
+            </div>
+
+            {/* Address Field */}
+            <div>
+              <label htmlFor="adresse" className="block text-sm font-medium text-gray-700 mb-2">
+                Adresse
+              </label>
+              <input
+                id="adresse"
+                type="text"
+                name="adresse"
+                placeholder="123 Rue de la Paix, 75000"
+                value={formData.adresse}
+                onChange={handleChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 outline-none"
+              />
+            </div>
+
+            {/* Image Upload Field */}
+            <div>
+              <label htmlFor="images" className="block text-sm font-medium text-gray-700 mb-2">
+                Images de votre magasin
+              </label>
+              <div className="relative">
+                <input
+                  id="images"
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => {
+                    const files = e.currentTarget.files;
+                    if (files) {
+                      const newImages: UploadedImage[] = [];
+                      for (let i = 0; i < files.length; i++) {
+                        const file = files[i];
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                          newImages.push({
+                            file,
+                            preview: event.target?.result as string,
+                          });
+                          if (newImages.length === files.length) {
+                            setUploadedImages([...uploadedImages, ...newImages]);
+                          }
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }
+                  }}
+                  className="hidden"
+                />
+                <label
+                  htmlFor="images"
+                  className="w-full px-4 py-8 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition duration-200 flex flex-col items-center justify-center"
+                >
+                  <svg className="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <p className="text-sm font-medium text-gray-700">Cliquez pour ajouter des images</p>
+                  <p className="text-xs text-gray-500">PNG, JPG, GIF jusqu'à 10MB</p>
+                </label>
+              </div>
+            </div>
+
+            {/* Image Preview Grid */}
+            {uploadedImages.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Images téléchargées ({uploadedImages.length})</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {uploadedImages.map((img, index) => (
+                    <div key={index} className="relative group">
+                      <img
+                        src={img.preview}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setUploadedImages(uploadedImages.filter((_, i) => i !== index));
+                        }}
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition duration-200"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      <p className="text-xs text-gray-600 mt-1 truncate">{img.file.name}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Success Message */}
             {success && (
