@@ -206,7 +206,9 @@ const OpticienList: React.FC = () => {
                   )}
 
                   {/* View Button */}
-                  <button className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+                  <button onClick={() => navigate(`/opticiens/${opticien["@id"].split('/').pop()}`)}
+                  className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+                  >
                     Voir les détails
                   </button>
                 </div>

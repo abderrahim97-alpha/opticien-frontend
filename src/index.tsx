@@ -8,6 +8,10 @@ import Register from './components/Register';
 import ProtectedRoute from './components/ProtectedRoute';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import OpticienList from './components/OpticienList';
+import OpticienDetails from './components/OpticienDetails';
+import MontureForm from './components/MontureForm';
+import MontureList from './components/MontureList';
+
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -25,6 +29,38 @@ root.render(
           element={
             <ProtectedRoute>
               <OpticienList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/montureform"
+          element={
+            <ProtectedRoute>
+              <MontureForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/montureslist"
+          element={
+            <ProtectedRoute>
+              <MontureList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/montures/create"
+          element={
+            <ProtectedRoute>
+              <MontureForm />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+        path="/opticiens/:id"
+        element={
+            <ProtectedRoute>
+              <OpticienDetails />
             </ProtectedRoute>
           }
         />
