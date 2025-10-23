@@ -11,6 +11,8 @@ import OpticienList from './components/OpticienList';
 import OpticienDetails from './components/OpticienDetails';
 import MontureForm from './components/MontureForm';
 import MontureList from './components/MontureList';
+import MontureDetails from './components/MontureDetails';
+import MontureEdit from './components/MontureEdit';
 
 
 const root = ReactDOM.createRoot(
@@ -33,6 +35,14 @@ root.render(
           }
         />
         <Route
+        path="/opticiens/:id"
+        element={
+            <ProtectedRoute>
+              <OpticienDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/montureform"
           element={
             <ProtectedRoute>
@@ -41,7 +51,15 @@ root.render(
           }
         />
         <Route
-          path="/montureslist"
+        path="/montures/:id/edit"
+        element={
+            <ProtectedRoute>
+              <MontureEdit />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/montures"
           element={
             <ProtectedRoute>
               <MontureList />
@@ -57,12 +75,12 @@ root.render(
           }
         />
         <Route
-        path="/opticiens/:id"
+        path="/montures/:id"
         element={
-            <ProtectedRoute>
-              <OpticienDetails />
-            </ProtectedRoute>
-          }
+          <ProtectedRoute>
+            <MontureDetails />
+          </ProtectedRoute>
+        }
         />
         <Route path="/app" element={<App />} />
       </Routes>
