@@ -24,6 +24,7 @@ interface MontureDetail {
   price: number;
   brand?: string;
   stock?: number;
+  status?: string;
   createdAt: string;
   updatedAt?: string;
   images: Image[];
@@ -44,6 +45,8 @@ const MontureDetails: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState<boolean>(false);
+  const [statusMessage, setStatusMessage] = useState<string>('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -54,6 +57,20 @@ const MontureDetails: React.FC = () => {
     fetchCurrentUser(token);
     fetchMontureDetails(token);
   }, [id, navigate]);
+
+  // Debug useEffect
+  useEffect(() => {
+    if (currentUser) {
+      console.log('Current User:', currentUser);
+      console.log('Is Admin?', isAdmin());
+      console.log('Roles:', currentUser.roles);
+    }
+    if (monture) {
+      console.log('Monture:', monture);
+      console.log('Monture Status:', monture.status);
+      console.log('Status lowercase:', monture.status?.toLowerCase());
+    }
+  }, [currentUser, monture]);
 
   const fetchCurrentUser = async (token: string) => {
     try {
@@ -88,18 +105,112 @@ const MontureDetails: React.FC = () => {
     }
   };
 
-  // Vérifier si l'utilisateur actuel est le propriétaire de la monture
   const isOwner = (): boolean => {
-    if (!currentUser || !monture) return false;
-    
-    // Extraire l'ID du owner depuis l'IRI (ex: "/api/users/uuid")
-    const ownerIdFromIri = monture.owner["@id"].split('/').pop();
-    
+    if (!currentUser || !monture || !monture.owner) return false;
+    const ownerIdFromIri = monture.owner["@id"]?.split('/').pop();
     return currentUser.id === ownerIdFromIri || currentUser.id === monture.owner.id;
+  };
+
+  const isAdmin = (): boolean => {
+    return currentUser?.roles?.includes('ROLE_ADMIN') || false;
+  };
+
+  const isPending = (): boolean => {
+    if (!monture?.status) return false;
+    return monture.status.toLowerCase() === 'pending';
   };
 
   const handleEdit = () => {
     navigate(`/montures/${id}/edit`);
+  };
+
+  const handleApprove = async () => {
+    if (!window.confirm('Êtes-vous sûr de vouloir approuver cette monture ?')) {
+      return;
+    }
+
+    setStatusUpdateLoading(true);
+    setStatusMessage('');
+
+    try {
+      const token = localStorage.getItem('token');
+      await api.patch(`/montures/${id}/approve`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setStatusMessage('Monture approuvée avec succès !');
+      if (token) fetchMontureDetails(token);
+    } catch (err: any) {
+      setStatusMessage('Erreur lors de l\'approbation');
+      console.error('Error approving monture:', err);
+    } finally {
+      setStatusUpdateLoading(false);
+      setTimeout(() => setStatusMessage(''), 3000);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!window.confirm('Êtes-vous sûr de vouloir rejeter cette monture ?')) {
+      return;
+    }
+
+    setStatusUpdateLoading(true);
+    setStatusMessage('');
+
+    try {
+      const token = localStorage.getItem('token');
+      await api.patch(`/montures/${id}/reject`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setStatusMessage('Monture rejetée');
+      if (token) fetchMontureDetails(token);
+    } catch (err: any) {
+      setStatusMessage('Erreur lors du rejet');
+      console.error('Error rejecting monture:', err);
+    } finally {
+      setStatusUpdateLoading(false);
+      setTimeout(() => setStatusMessage(''), 3000);
+    }
+  };
+
+  const getStatusBadge = (status?: string) => {
+    const lowerStatus = status?.toLowerCase();
+    
+    switch (lowerStatus) {
+      case 'approved':
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Approuvé
+          </span>
+        );
+      case 'rejected':
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            Rejeté
+          </span>
+        );
+      case 'pending':
+      default:
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+            En attente
+          </span>
+        );
+    }
   };
 
   if (loading) {
@@ -151,31 +262,46 @@ const MontureDetails: React.FC = () => {
             Retour à la liste
           </button>
 
-          {/* Edit Button - Only visible for owner */}
-          {isOwner() && (
-            <button
-              onClick={handleEdit}
-              className="flex items-center bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition shadow-md font-medium"
-            >
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              Modifier
-            </button>
-          )}
+          <div className="flex items-center gap-3">
+            {isOwner() && (
+              <button
+                onClick={handleEdit}
+                className="flex items-center bg-indigo-600 text-white px-6 py-2.5 rounded-lg hover:bg-indigo-700 transition shadow-md font-medium"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+                Modifier
+              </button>
+            )}
+          </div>
         </div>
+
+        {/* Status Message */}
+        {statusMessage && (
+          <div className={`mb-6 p-4 rounded-lg ${
+            statusMessage.includes('succès') || statusMessage.includes('approuvée') 
+              ? 'bg-green-50 text-green-800 border border-green-200' 
+              : statusMessage.includes('Erreur')
+              ? 'bg-red-50 text-red-800 border border-red-200'
+              : 'bg-blue-50 text-blue-800 border border-blue-200'
+          }`}>
+            <p className="font-medium">{statusMessage}</p>
+          </div>
+        )}
 
         {/* Header Card */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
-            {/* Icon */}
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
               {monture.name.substring(0, 2).toUpperCase()}
             </div>
 
-            {/* Info */}
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">{monture.name}</h1>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-4xl font-bold text-gray-900">{monture.name}</h1>
+                {getStatusBadge(monture.status)}
+              </div>
               {monture.brand && <p className="text-xl text-gray-600 mb-4">Marque: {monture.brand}</p>}
               <p className="text-3xl font-bold text-blue-600 mb-2">{monture.price.toFixed(2)} DH</p>
               {monture.stock !== undefined && (
@@ -185,6 +311,35 @@ const MontureDetails: React.FC = () => {
               )}
             </div>
           </div>
+
+          {/* Admin Status Control Buttons */}
+          {isAdmin() && isPending() && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Actions administrateur</h3>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleApprove}
+                  disabled={statusUpdateLoading}
+                  className="flex-1 flex items-center justify-center bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  {statusUpdateLoading ? 'Traitement...' : 'Approuver'}
+                </button>
+                <button
+                  onClick={handleReject}
+                  disabled={statusUpdateLoading}
+                  className="flex-1 flex items-center justify-center bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  {statusUpdateLoading ? 'Traitement...' : 'Rejeter'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Details Card */}
@@ -223,6 +378,13 @@ const MontureDetails: React.FC = () => {
             <div>
               <label className="text-sm font-medium text-gray-600 block mb-1">Date de création</label>
               <p className="text-lg text-gray-900">{new Date(monture.createdAt).toLocaleDateString('fr-FR')}</p>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600 block mb-1">Statut</label>
+              <div className="mt-1">
+                {getStatusBadge(monture.status)}
+              </div>
             </div>
 
             <div>
@@ -299,7 +461,6 @@ const MontureDetails: React.FC = () => {
               className="relative w-full max-w-4xl my-8"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close Button */}
               <button
                 onClick={() => setSelectedImageIndex(null)}
                 className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition z-10 shadow-lg"
@@ -310,14 +471,12 @@ const MontureDetails: React.FC = () => {
                 </svg>
               </button>
 
-              {/* Main Image */}
               <img
                 src={`http://127.0.0.1:8000/uploads/opticiens/${monture.images[selectedImageIndex].imageName}`}
                 alt={`Full view ${selectedImageIndex + 1}`}
                 className="w-full h-auto rounded-lg max-h-[70vh] object-contain"
               />
 
-              {/* Image Counter */}
               <div className="text-center mt-4 text-white">
                 <p className="text-sm font-medium">
                   Image {selectedImageIndex + 1} sur {monture.images.length}
@@ -327,7 +486,6 @@ const MontureDetails: React.FC = () => {
                 </p>
               </div>
 
-              {/* Navigation Buttons */}
               <div className="flex justify-between items-center mt-6 gap-4">
                 <button
                   onClick={() =>
@@ -341,7 +499,6 @@ const MontureDetails: React.FC = () => {
                   Précédent
                 </button>
 
-                {/* Thumbnail Strip */}
                 <div className="flex gap-2 justify-center flex-wrap max-w-2xl">
                   {monture.images.map((image, index) => (
                     <button
