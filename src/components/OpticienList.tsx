@@ -15,6 +15,7 @@ interface Opticien {
   prenom: string;
   telephone: string;
   city: string;
+  status?: string;
   images: Image[];
   adresse?: string;
   companyName?: string;
@@ -30,17 +31,15 @@ const OpticienList: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-        // Check token before fetching
     const token = localStorage.getItem('token');
     if (!token) {
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
       return;
     }
     fetchOpticiens(token);
   }, []);
 
   useEffect(() => {
-    // Filter opticiens based on search term
     const filtered = opticiens.filter(
       (opticien) =>
         opticien.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -56,9 +55,9 @@ const OpticienList: React.FC = () => {
       setLoading(true);
       setError('');
 
-      const response = await api.get('/opticiens',{
+      const response = await api.get('/opticiens', {
         headers: {
-          Authorization: `Bearer ${token}`, // Pass token in header
+          Authorization: `Bearer ${token}`,
         },
       });
       setOpticiens(response.data.member || []);
@@ -67,6 +66,41 @@ const OpticienList: React.FC = () => {
       console.error('Error fetching opticiens:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getStatusBadge = (status?: string) => {
+    const lowerStatus = status?.toLowerCase();
+    
+    switch (lowerStatus) {
+      case 'approved':
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Approuvé
+          </span>
+        );
+      case 'rejected':
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            Rejeté
+          </span>
+        );
+      case 'pending':
+      default:
+        return (
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+            En attente
+          </span>
+        );
     }
   };
 
@@ -137,17 +171,23 @@ const OpticienList: React.FC = () => {
                 {/* Card Body */}
                 <div className="p-6">
                   {/* Profile Section */}
-                  <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold text-lg">
+                  <div className="flex items-start mb-4">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
                       {opticien.prenom.charAt(0)}{opticien.nom.charAt(0)}
                     </div>
                     <div className="ml-4 flex-1">
-                      <h3 className="text-lg font-bold text-gray-900">
-                        {opticien.prenom} {opticien.nom}
-                      </h3>
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="text-lg font-bold text-gray-900">
+                          {opticien.prenom} {opticien.nom}
+                        </h3>
+                      </div>
                       {opticien.companyName && (
-                        <p className="text-sm text-gray-600">{opticien.companyName}</p>
+                        <p className="text-sm text-gray-600 mb-1">{opticien.companyName}</p>
                       )}
+                      {/* Status Badge */}
+                      <div className="mt-2">
+                        {getStatusBadge(opticien.status)}
+                      </div>
                     </div>
                   </div>
 
@@ -206,8 +246,9 @@ const OpticienList: React.FC = () => {
                   )}
 
                   {/* View Button */}
-                  <button onClick={() => navigate(`/opticiens/${opticien["@id"].split('/').pop()}`)}
-                  className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
+                  <button 
+                    onClick={() => navigate(`/opticiens/${opticien["@id"].split('/').pop()}`)}
+                    className="w-full mt-4 bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
                   >
                     Voir les détails
                   </button>

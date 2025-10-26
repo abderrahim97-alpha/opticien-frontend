@@ -24,7 +24,6 @@ root.render(
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/opticiens" element={<OpticienList />} />
         {/* Protected Routes */}
         <Route
           path="/opticiens"

@@ -138,7 +138,7 @@ const MontureEdit: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/login', { replace: true });
+        navigate('/', { replace: true });
         return;
       }
 

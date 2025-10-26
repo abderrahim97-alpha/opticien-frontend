@@ -17,28 +17,52 @@ interface OpticienDetail {
   email: string;
   telephone?: string;
   city?: string;
+  status?: string;
   images: Image[];
   adresse?: string;
   companyName?: string;
   ICE?: string;
 }
 
+interface CurrentUser {
+  id: string;
+  email: string;
+  roles: string[];
+}
+
 const OpticienDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [opticien, setOpticien] = useState<OpticienDetail | null>(null);
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState<boolean>(false);
+  const [statusMessage, setStatusMessage] = useState<string>('');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
       return;
     }
+    fetchCurrentUser(token);
     fetchOpticienDetails(token);
   }, [id, navigate]);
+
+  const fetchCurrentUser = async (token: string) => {
+    try {
+      const response = await api.get('/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setCurrentUser(response.data);
+    } catch (err: any) {
+      console.error('Error fetching current user:', err);
+    }
+  };
 
   const fetchOpticienDetails = async (token: string) => {
     try {
@@ -57,6 +81,104 @@ const OpticienDetails: React.FC = () => {
       console.error('Error fetching opticien details:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const isAdmin = (): boolean => {
+    return currentUser?.roles?.includes('ROLE_ADMIN') || false;
+  };
+
+  const isPending = (): boolean => {
+    if (!opticien?.status) return false;
+    return opticien.status.toLowerCase() === 'pending';
+  };
+
+  const handleApprove = async () => {
+    if (!window.confirm('Êtes-vous sûr de vouloir approuver cet opticien ?')) {
+      return;
+    }
+
+    setStatusUpdateLoading(true);
+    setStatusMessage('');
+
+    try {
+      const token = localStorage.getItem('token');
+      await api.patch(`/opticiens/${id}/approve`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setStatusMessage('Opticien approuvé avec succès !');
+      if (token) fetchOpticienDetails(token);
+    } catch (err: any) {
+      setStatusMessage('Erreur lors de l\'approbation');
+      console.error('Error approving opticien:', err);
+    } finally {
+      setStatusUpdateLoading(false);
+      setTimeout(() => setStatusMessage(''), 3000);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!window.confirm('Êtes-vous sûr de vouloir rejeter cet opticien ?')) {
+      return;
+    }
+
+    setStatusUpdateLoading(true);
+    setStatusMessage('');
+
+    try {
+      const token = localStorage.getItem('token');
+      await api.patch(`/opticiens/${id}/reject`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setStatusMessage('Opticien rejeté');
+      if (token) fetchOpticienDetails(token);
+    } catch (err: any) {
+      setStatusMessage('Erreur lors du rejet');
+      console.error('Error rejecting opticien:', err);
+    } finally {
+      setStatusUpdateLoading(false);
+      setTimeout(() => setStatusMessage(''), 3000);
+    }
+  };
+
+  const getStatusBadge = (status?: string) => {
+    const lowerStatus = status?.toLowerCase();
+    
+    switch (lowerStatus) {
+      case 'approved':
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+            Approuvé
+          </span>
+        );
+      case 'rejected':
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            Rejeté
+          </span>
+        );
+      case 'pending':
+      default:
+        return (
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+            <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+            </svg>
+            En attente
+          </span>
+        );
     }
   };
 
@@ -108,6 +230,19 @@ const OpticienDetails: React.FC = () => {
           Retour à la liste
         </button>
 
+        {/* Status Message */}
+        {statusMessage && (
+          <div className={`mb-6 p-4 rounded-lg ${
+            statusMessage.includes('succès') || statusMessage.includes('approuvé') 
+              ? 'bg-green-50 text-green-800 border border-green-200' 
+              : statusMessage.includes('Erreur')
+              ? 'bg-red-50 text-red-800 border border-red-200'
+              : 'bg-blue-50 text-blue-800 border border-blue-200'
+          }`}>
+            <p className="font-medium">{statusMessage}</p>
+          </div>
+        )}
+
         {/* Header Card */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <div className="flex flex-col md:flex-row items-start md:items-center gap-6">
@@ -118,9 +253,12 @@ const OpticienDetails: React.FC = () => {
 
             {/* Info */}
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                {opticien.prenom} {opticien.nom}
-              </h1>
+              <div className="flex items-center gap-3 mb-2">
+                <h1 className="text-4xl font-bold text-gray-900">
+                  {opticien.prenom} {opticien.nom}
+                </h1>
+                {getStatusBadge(opticien.status)}
+              </div>
               {opticien.companyName && (
                 <p className="text-xl text-gray-600 mb-4">{opticien.companyName}</p>
               )}
@@ -150,6 +288,35 @@ const OpticienDetails: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Admin Status Control Buttons */}
+          {isAdmin() && isPending() && (
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h3 className="text-sm font-medium text-gray-700 mb-3">Actions administrateur</h3>
+              <div className="flex gap-3">
+                <button
+                  onClick={handleApprove}
+                  disabled={statusUpdateLoading}
+                  className="flex-1 flex items-center justify-center bg-green-600 text-white px-4 py-2.5 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  {statusUpdateLoading ? 'Traitement...' : 'Approuver'}
+                </button>
+                <button
+                  onClick={handleReject}
+                  disabled={statusUpdateLoading}
+                  className="flex-1 flex items-center justify-center bg-red-600 text-white px-4 py-2.5 rounded-lg hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                >
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  {statusUpdateLoading ? 'Traitement...' : 'Rejeter'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Details Grid */}
@@ -182,6 +349,13 @@ const OpticienDetails: React.FC = () => {
               <div>
                 <label className="text-sm font-medium text-gray-600 block mb-1">Ville</label>
                 <p className="text-lg text-gray-900">{opticien.city || 'Non renseigné'}</p>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-gray-600 block mb-1">Statut</label>
+                <div className="mt-1">
+                  {getStatusBadge(opticien.status)}
+                </div>
               </div>
             </div>
           </div>
@@ -231,7 +405,6 @@ const OpticienDetails: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {opticien.images.map((image, index) => {
-                // Construct the image URL using the imageName from VichUploadBundle
                 const imageUrl = `http://127.0.0.1:8000/uploads/opticiens/${image.imageName}`;
                 
                 return (
@@ -245,7 +418,6 @@ const OpticienDetails: React.FC = () => {
                       alt={image.imageName || `Image ${index + 1}`}
                       className="w-full h-full object-cover group-hover:scale-110 transition duration-200"
                       onError={(e) => {
-                        // Fallback if image fails to load
                         (e.currentTarget.parentElement as HTMLElement).innerHTML = `
                           <div class="w-full h-full bg-gray-300 flex items-center justify-center">
                             <svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -286,7 +458,6 @@ const OpticienDetails: React.FC = () => {
               className="relative w-full max-w-4xl my-8"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close Button - Inside Top Right */}
               <button
                 onClick={() => setSelectedImageIndex(null)}
                 className="absolute top-4 right-4 bg-red-600 hover:bg-red-700 text-white p-2 rounded-full transition z-10 shadow-lg"
@@ -297,14 +468,12 @@ const OpticienDetails: React.FC = () => {
                 </svg>
               </button>
 
-              {/* Main Image */}
               <img
                 src={`http://127.0.0.1:8000/uploads/opticiens/${opticien.images[selectedImageIndex].imageName}`}
                 alt={`Full view ${selectedImageIndex + 1}`}
                 className="w-full h-auto rounded-lg max-h-[70vh] object-contain"
               />
 
-              {/* Image Counter */}
               <div className="text-center mt-4 text-white">
                 <p className="text-sm font-medium">
                   Image {selectedImageIndex + 1} sur {opticien.images.length}
@@ -314,7 +483,6 @@ const OpticienDetails: React.FC = () => {
                 </p>
               </div>
 
-              {/* Navigation Buttons */}
               <div className="flex justify-between items-center mt-6 gap-4">
                 <button
                   onClick={() => setSelectedImageIndex(selectedImageIndex === 0 ? opticien.images.length - 1 : selectedImageIndex - 1)}
@@ -326,7 +494,6 @@ const OpticienDetails: React.FC = () => {
                   Précédent
                 </button>
 
-                {/* Thumbnail Strip */}
                 <div className="flex gap-2 justify-center flex-wrap max-w-2xl">
                   {opticien.images.map((image, index) => (
                     <button
