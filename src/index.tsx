@@ -13,6 +13,7 @@ import MontureForm from './components/MontureForm';
 import MontureList from './components/MontureList';
 import MontureDetails from './components/MontureDetails';
 import MontureEdit from './components/MontureEdit';
+import PendingApproval from './components/PendingApproval';
 
 
 const root = ReactDOM.createRoot(
@@ -30,6 +31,14 @@ root.render(
           element={
             <ProtectedRoute>
               <OpticienList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pending-approval"
+          element={
+            <ProtectedRoute>
+              <PendingApproval />
             </ProtectedRoute>
           }
         />

@@ -24,12 +24,56 @@ const Login: React.FC = () => {
     setIsLoading(true);
 
     try {
+      // 1) Authentification - on récupère le token
       const response = await api.post('/login_check', formData);
-      localStorage.setItem('token', response.data.token);
-      // Redirect to dashboard or home page after successful login
-      window.location.href = '/dashboard';
+      const token = response.data.token;
+      localStorage.setItem('token', token);
+
+      // 2) Récupérer le profil pour savoir rôle/status
+      //    (adapté si ton endpoint /me renvoie role OR roles[] and status)
+      const profileRes = await api.get('/me', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const user = profileRes.data;
+
+      // 3) Déterminer le rôle (compatibilité role: 'admin' OR roles: ['ROLE_ADMIN'])
+      const roles: string[] = user.roles ?? (Array.isArray(user.role) ? user.role : undefined) ?? [];
+      // si backend renvoie role en string (ex: 'admin' ou 'opticien')
+      const roleString: string | undefined = typeof user.role === 'string' ? user.role : undefined;
+
+      const isAdmin =
+        roleString === 'admin' ||
+        roles.some((r) => r.toLowerCase().includes('admin') || r === 'ROLE_ADMIN');
+
+      const isOpticien =
+        roleString === 'opticien' ||
+        roles.some((r) => r.toLowerCase().includes('opticien') || r === 'ROLE_OPTICIEN');
+
+      const status = (user.status ?? '').toString().toLowerCase();
+
+      // 4) Redirections selon rôle / status
+      if (isAdmin) {
+        // admin n'a pas de statut -> dashboard direct
+        window.location.href = '/dashboard';
+      } else if (isOpticien) {
+        if (status === 'pending' || status === 'en attente' || status === 'waiting') {
+          // route de la page "PendingApproval".
+          window.location.href = '/pending-approval';
+        } else if (status === 'approved' || status === 'approuvé' || status === 'approved') {
+          window.location.href = '/dashboard';
+        } else if (status === 'rejected' || status === 'refused' || status === 'rejeted') {
+          window.location.href = '/account-rejected';
+        } else {
+          // Défaut : vers dashboard (ou home si tu préfères)
+          window.location.href = '/dashboard';
+        }
+      } else {
+        // Rôle inconnu — comportement précédent : aller au dashboard
+        window.location.href = '/dashboard';
+      }
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Email ou mot de passe incorrect');
+      // conserve ton message d'erreur existant
+      setError(err.response?.data?.error || err.response?.data?.message || 'Email ou mot de passe incorrect');
     } finally {
       setIsLoading(false);
     }
