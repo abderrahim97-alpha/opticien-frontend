@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../Api/axios';
+import api from '../../Api/axios';
 
 interface RegisterData {
   email: string;

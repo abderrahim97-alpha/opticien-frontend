@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api from '../Api/axios';
+import api from '../../Api/axios';
 import { useNavigate } from 'react-router-dom';
 
 interface Image {

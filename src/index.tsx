@@ -3,18 +3,18 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import Login from './components/Login';
-import Register from './components/Register';
-import ProtectedRoute from './components/ProtectedRoute';
+import Login from './components/authentication/Login';
+import Register from './components/authentication/Register';
+import StatusProtectedRoute from './components/authentication/StatusProtectedRoute';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import OpticienList from './components/OpticienList';
-import OpticienDetails from './components/OpticienDetails';
-import MontureForm from './components/MontureForm';
-import MontureList from './components/MontureList';
-import MontureDetails from './components/MontureDetails';
-import MontureEdit from './components/MontureEdit';
-import PendingApproval from './components/PendingApproval';
-
+import OpticienList from './components/opticiens/OpticienList';
+import OpticienDetails from './components/opticiens/OpticienDetails';
+import MontureForm from './components/montures/MontureForm';
+import MontureList from './components/montures/MontureList';
+import MontureDetails from './components/montures/MontureDetails';
+import MontureEdit from './components/montures/MontureEdit';
+import PendingApproval from './components/status/PendingApproval';
+import AccountRejected from './components/status/AccountRejected';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -23,80 +23,96 @@ root.render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        {/* Protected Routes */}
-        <Route
-          path="/opticiens"
-          element={
-            <ProtectedRoute>
-              <OpticienList />
-            </ProtectedRoute>
-          }
-        />
+        
+        {/* Status Pages - Ne nécessitent PAS d'approbation */}
         <Route
           path="/pending-approval"
           element={
-            <ProtectedRoute>
+            <StatusProtectedRoute requiresApproval={false}>
               <PendingApproval />
-            </ProtectedRoute>
+            </StatusProtectedRoute>
           }
         />
         <Route
-        path="/opticiens/:id"
-        element={
-            <ProtectedRoute>
+          path="/account-rejected"
+          element={
+            <StatusProtectedRoute requiresApproval={false}>
+              <AccountRejected />
+            </StatusProtectedRoute>
+          }
+        />
+        
+        {/* Protected Routes - Nécessitent approbation (sauf admin) */}
+        <Route
+          path="/opticiens"
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
+              <OpticienList />
+            </StatusProtectedRoute>
+          }
+        />
+        <Route
+          path="/opticiens/:id"
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
               <OpticienDetails />
-            </ProtectedRoute>
+            </StatusProtectedRoute>
           }
         />
         <Route
           path="/montureform"
           element={
-            <ProtectedRoute>
+            <StatusProtectedRoute requiresApproval={true}>
               <MontureForm />
-            </ProtectedRoute>
+            </StatusProtectedRoute>
           }
         />
         <Route
-        path="/montures/:id/edit"
-        element={
-            <ProtectedRoute>
+          path="/montures/:id/edit"
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
               <MontureEdit />
-            </ProtectedRoute>
+            </StatusProtectedRoute>
           }
         />
         <Route
           path="/montures"
           element={
-            <ProtectedRoute>
+            <StatusProtectedRoute requiresApproval={true}>
               <MontureList />
-            </ProtectedRoute>
+            </StatusProtectedRoute>
           }
         />
         <Route
           path="/montures/create"
           element={
-            <ProtectedRoute>
+            <StatusProtectedRoute requiresApproval={true}>
               <MontureForm />
-            </ProtectedRoute>
+            </StatusProtectedRoute>
           }
         />
         <Route
-        path="/montures/:id"
-        element={
-          <ProtectedRoute>
-            <MontureDetails />
-          </ProtectedRoute>
-        }
+          path="/montures/:id"
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
+              <MontureDetails />
+            </StatusProtectedRoute>
+          }
         />
-        <Route path="/app" element={<App />} />
+        <Route 
+          path="/app" 
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
+              <App />
+            </StatusProtectedRoute>
+          } 
+        />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../Api/axios';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import api from '../../Api/axios';
 
 interface MontureFormData {
   name: string;
@@ -10,13 +10,34 @@ interface MontureFormData {
   stock: string;
 }
 
+interface ExistingImage {
+  "@id": string;
+  "@type": string;
+  imageName: string;
+  id?: number;
+}
+
 interface UploadedImage {
   file: File;
   preview: string;
 }
 
-const MontureForm: React.FC = () => {
+interface MontureDetail {
+  "@id": string;
+  "@type": string;
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  brand?: string;
+  stock?: number;
+  images: ExistingImage[];
+}
+
+const MontureEdit: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  
   const [formData, setFormData] = useState<MontureFormData>({
     name: '',
     description: '',
@@ -25,11 +46,50 @@ const MontureForm: React.FC = () => {
     stock: '',
   });
 
+  const [existingImages, setExistingImages] = useState<ExistingImage[]>([]);
+  const [newImages, setNewImages] = useState<UploadedImage[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+  
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
+  const [loadingData, setLoadingData] = useState<boolean>(true);
   const [priceError, setPriceError] = useState<string>('');
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/', { replace: true });
+      return;
+    }
+    fetchMontureData(token);
+  }, [id, navigate]);
+
+  const fetchMontureData = async (token: string) => {
+    try {
+      setLoadingData(true);
+      const response = await api.get<MontureDetail>(`/montures/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const monture = response.data;
+      setFormData({
+        name: monture.name,
+        description: monture.description || '',
+        price: monture.price.toString(),
+        brand: monture.brand || '',
+        stock: monture.stock?.toString() || '0',
+      });
+      setExistingImages(monture.images || []);
+    } catch (err: any) {
+      setError('Erreur lors du chargement des données');
+      console.error('Error fetching monture:', err);
+    } finally {
+      setLoadingData(false);
+    }
+  };
 
   const validatePrice = (price: string): boolean => {
     if (!price || price.trim() === '') return false;
@@ -44,7 +104,6 @@ const MontureForm: React.FC = () => {
     if (error) setError('');
     if (success) setSuccess('');
 
-    // Validate price on change
     if (name === 'price') {
       if (value && !validatePrice(value)) {
         setPriceError('Le prix doit être un nombre valide');
@@ -54,18 +113,21 @@ const MontureForm: React.FC = () => {
     }
   };
 
+  const handleDeleteExistingImage = (imageId: string) => {
+    setExistingImages(existingImages.filter((img) => img["@id"] !== imageId));
+    setImagesToDelete([...imagesToDelete, imageId]);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    // Validate required fields
     if (!formData.name || !formData.price) {
       setError('Le nom et le prix sont obligatoires');
       return;
     }
 
-    // Validate price
     if (!validatePrice(formData.price)) {
       setPriceError('Le prix doit être un nombre valide');
       return;
@@ -87,42 +149,65 @@ const MontureForm: React.FC = () => {
       submitData.append('brand', formData.brand);
       submitData.append('stock', formData.stock || '0');
 
-      // Add uploaded images
-      uploadedImages.forEach((img) => {
-        submitData.append('images[]', img.file);
+      // Add new images
+      newImages.forEach((img, index) => {
+        submitData.append(`images[${index}]`, img.file);
       });
 
-      const response = await api.post('/montures-upload', submitData, {
+      // Add images to delete (if you implement deletion in backend)
+      imagesToDelete.forEach((imgId) => {
+        submitData.append('imagesToDelete[]', imgId);
+      });
+
+      const response = await api.post(`/montures/${id}/edit`, submitData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           Authorization: `Bearer ${token}`,
         },
       });
 
-      setSuccess(response.data.message || 'Monture créée avec succès ! Redirection...');
+      setSuccess('Monture mise à jour avec succès ! Redirection...');
       
-      // Reset form
-      setFormData({ name: '', description: '', price: '', brand: '', stock: '' });
-      setUploadedImages([]);
-
-      // Redirect after 2 seconds
       setTimeout(() => {
-        navigate('/montures');
+        navigate(`/montures/${id}`);
       }, 2000);
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Erreur lors de la création de la monture');
+      setError(err.response?.data?.error || 'Erreur lors de la mise à jour');
     } finally {
       setIsLoading(false);
     }
   };
+
+  if (loadingData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+        <div className="text-center">
+          <svg className="animate-spin h-12 w-12 text-blue-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <p className="text-gray-600 font-medium">Chargement...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-12 px-4">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Ajouter une Monture</h1>
-          <p className="text-gray-600">Créez une nouvelle monture à vendre sur la marketplace</p>
+          <button
+            onClick={() => navigate(`/montures/${id}`)}
+            className="flex items-center text-blue-600 hover:text-blue-700 mb-4 font-medium transition"
+          >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Retour aux détails
+          </button>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Modifier la Monture</h1>
+          <p className="text-gray-600">Mettez à jour les informations de votre monture</p>
         </div>
 
         {/* Form Card */}
@@ -224,10 +309,41 @@ const MontureForm: React.FC = () => {
               />
             </div>
 
-            {/* Image Upload Field */}
+            {/* Existing Images */}
+            {existingImages.length > 0 && (
+              <div>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  Images actuelles ({existingImages.length})
+                </h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {existingImages.map((img, index) => (
+                    <div key={img["@id"]} className="relative group">
+                      <img
+                        src={`http://127.0.0.1:8000/uploads/opticiens/${img.imageName}`}
+                        alt={`Existing ${index + 1}`}
+                        className="w-full h-32 object-cover rounded-lg border border-gray-200"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteExistingImage(img["@id"])}
+                        className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition duration-200"
+                        title="Supprimer cette image"
+                      >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                        </svg>
+                      </button>
+                      <p className="text-xs text-gray-600 mt-1 truncate">{img.imageName}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* New Image Upload Field */}
             <div>
               <label htmlFor="images" className="block text-sm font-medium text-gray-700 mb-2">
-                Images du produit
+                Ajouter de nouvelles images
               </label>
               <div className="relative">
                 <input
@@ -238,17 +354,17 @@ const MontureForm: React.FC = () => {
                   onChange={(e) => {
                     const files = e.currentTarget.files;
                     if (files) {
-                      const newImages: UploadedImage[] = [];
+                      const newImgs: UploadedImage[] = [];
                       for (let i = 0; i < files.length; i++) {
                         const file = files[i];
                         const reader = new FileReader();
                         reader.onload = (event) => {
-                          newImages.push({
+                          newImgs.push({
                             file,
                             preview: event.target?.result as string,
                           });
-                          if (newImages.length === files.length) {
-                            setUploadedImages([...uploadedImages, ...newImages]);
+                          if (newImgs.length === files.length) {
+                            setNewImages([...newImages, ...newImgs]);
                           }
                         };
                         reader.readAsDataURL(file);
@@ -270,22 +386,24 @@ const MontureForm: React.FC = () => {
               </div>
             </div>
 
-            {/* Image Preview Grid */}
-            {uploadedImages.length > 0 && (
+            {/* New Image Preview Grid */}
+            {newImages.length > 0 && (
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Images téléchargées ({uploadedImages.length})</h3>
+                <h3 className="text-sm font-medium text-gray-700 mb-3">
+                  Nouvelles images ({newImages.length})
+                </h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {uploadedImages.map((img, index) => (
+                  {newImages.map((img, index) => (
                     <div key={index} className="relative group">
                       <img
                         src={img.preview}
-                        alt={`Preview ${index + 1}`}
+                        alt={`New preview ${index + 1}`}
                         className="w-full h-32 object-cover rounded-lg border border-gray-200"
                       />
                       <button
                         type="button"
                         onClick={() => {
-                          setUploadedImages(uploadedImages.filter((_, i) => i !== index));
+                          setNewImages(newImages.filter((_, i) => i !== index));
                         }}
                         className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition duration-200"
                       >
@@ -320,24 +438,33 @@ const MontureForm: React.FC = () => {
               </div>
             )}
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isLoading || !!priceError}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-            >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Création en cours...
-                </>
-              ) : (
-                'Créer la monture'
-              )}
-            </button>
+            {/* Action Buttons */}
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => navigate(`/montures/${id}`)}
+                className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-medium hover:bg-gray-300 transition duration-200"
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                disabled={isLoading || !!priceError}
+                className="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              >
+                {isLoading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Mise à jour...
+                  </>
+                ) : (
+                  'Enregistrer les modifications'
+                )}
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -345,4 +472,4 @@ const MontureForm: React.FC = () => {
   );
 };
 
-export default MontureForm;
+export default MontureEdit;
