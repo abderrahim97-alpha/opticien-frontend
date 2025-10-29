@@ -23,7 +23,7 @@ const AccountRejected: React.FC = () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        navigate('/login', { replace: true });
+        navigate('/', { replace: true });
         return;
       }
 
@@ -44,7 +44,7 @@ const AccountRejected: React.FC = () => {
       }
     } catch (err) {
       console.error('Error checking user status:', err);
-      navigate('/login', { replace: true });
+      navigate('/', { replace: true });
     } finally {
       setLoading(false);
     }
@@ -52,7 +52,7 @@ const AccountRejected: React.FC = () => {
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    navigate('/login', { replace: true });
+    navigate('/', { replace: true });
   };
 
   const handleContactSupport = () => {

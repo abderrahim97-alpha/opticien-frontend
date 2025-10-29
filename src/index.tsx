@@ -15,6 +15,10 @@ import MontureDetails from './components/montures/MontureDetails';
 import MontureEdit from './components/montures/MontureEdit';
 import PendingApproval from './components/status/PendingApproval';
 import AccountRejected from './components/status/AccountRejected';
+import DashboardLayout from './components/layout/DashboardLayout';
+import ProfileSettings from './components/opticiens/ProfileSettings';
+import ForgotPassword from './components/authentication/ForgotPassword';
+import ResetPassword from './components/authentication/ResetPassword';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -26,6 +30,9 @@ root.render(
         {/* Public Routes */}
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        {/* Password Reset Routes - Public */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         
         {/* Status Pages - Ne nécessitent PAS d'approbation */}
         <Route
@@ -50,7 +57,9 @@ root.render(
           path="/opticiens"
           element={
             <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
               <OpticienList />
+              </DashboardLayout>
             </StatusProtectedRoute>
           }
         />
@@ -58,7 +67,19 @@ root.render(
           path="/opticiens/:id"
           element={
             <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
               <OpticienDetails />
+              </DashboardLayout>
+            </StatusProtectedRoute>
+          }
+        />
+        <Route
+          path="/ProfileSettings"
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
+              <ProfileSettings />
+              </DashboardLayout>
             </StatusProtectedRoute>
           }
         />
@@ -66,7 +87,9 @@ root.render(
           path="/montureform"
           element={
             <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
               <MontureForm />
+              </DashboardLayout>
             </StatusProtectedRoute>
           }
         />
@@ -74,7 +97,9 @@ root.render(
           path="/montures/:id/edit"
           element={
             <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
               <MontureEdit />
+              </DashboardLayout>
             </StatusProtectedRoute>
           }
         />
@@ -82,7 +107,9 @@ root.render(
           path="/montures"
           element={
             <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
               <MontureList />
+              </DashboardLayout>
             </StatusProtectedRoute>
           }
         />
@@ -90,7 +117,9 @@ root.render(
           path="/montures/create"
           element={
             <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
               <MontureForm />
+              </DashboardLayout>
             </StatusProtectedRoute>
           }
         />
@@ -98,7 +127,9 @@ root.render(
           path="/montures/:id"
           element={
             <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
               <MontureDetails />
+              </DashboardLayout>
             </StatusProtectedRoute>
           }
         />
