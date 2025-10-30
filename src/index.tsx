@@ -19,6 +19,9 @@ import DashboardLayout from './components/layout/DashboardLayout';
 import ProfileSettings from './components/opticiens/ProfileSettings';
 import ForgotPassword from './components/authentication/ForgotPassword';
 import ResetPassword from './components/authentication/ResetPassword';
+import Statistics from './components/Statistics/Statistics';
+import AdminValidation from './components/Admin/AdminValidation';
+import Dashboard from './components/Dashboard';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -69,6 +72,36 @@ root.render(
             <StatusProtectedRoute requiresApproval={true}>
               <DashboardLayout>
               <OpticienDetails />
+              </DashboardLayout>
+            </StatusProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
+              <Dashboard />
+              </DashboardLayout>
+            </StatusProtectedRoute>
+          }
+        />
+        <Route
+          path="/statistiques"
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
+              <Statistics />
+              </DashboardLayout>
+            </StatusProtectedRoute>
+          }
+        />
+        <Route
+          path="/validation"
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
+              <AdminValidation />
               </DashboardLayout>
             </StatusProtectedRoute>
           }

@@ -16,8 +16,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <Navbar onToggleSidebar={toggleSidebar} />
+      {/* Navbar - ✅ Ajout de isSidebarOpen */}
+      <Navbar onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
 
       {/* Sidebar */}
       <Sidebar isOpen={isSidebarOpen} />
