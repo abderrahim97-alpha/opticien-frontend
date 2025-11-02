@@ -128,119 +128,164 @@ const Statistics: React.FC = () => {
   ] : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Statistiques</h1>
-          <p className="text-gray-600 mt-2">
-            {isAdmin ? 'Vue d\'ensemble de la plateforme' : 'Vos statistiques personnelles'}
-          </p>
+    <div className="space-y-4 sm:space-y-6">
+      {/* Header avec gradient - comme Dashboard */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-lg shadow-lg p-4 sm:p-6 text-white">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">Statistiques</h1>
+        <p className="text-sm sm:text-base text-blue-100">
+          {isAdmin ? 'Vue d\'ensemble de la plateforme' : 'Vos statistiques personnelles'}
+        </p>
+      </div>
+
+      {/* Cartes de statistiques Montures - Responsive Grid avec bordures de couleur */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+        {/* Total Montures */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-blue-500 hover:shadow-md transition">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Montures</p>
+              <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
+                {stats.montures.total}
+              </p>
+            </div>
+            <div className="bg-blue-100 rounded-full p-2 sm:p-3 flex-shrink-0 ml-3">
+              <svg className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </div>
+          </div>
         </div>
 
-        {/* Cartes de statistiques */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Total Montures */}
-          <div className="bg-white rounded-lg shadow p-6">
+        {/* Approuvées */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-green-500 hover:shadow-md transition">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Approuvées</p>
+              <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-1 sm:mt-2">
+                {stats.montures.approved}
+              </p>
+            </div>
+            <div className="bg-green-100 rounded-full p-2 sm:p-3 flex-shrink-0 ml-3">
+              <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* En attente */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-yellow-500 hover:shadow-md transition">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">En attente</p>
+              <p className="text-2xl sm:text-3xl font-bold text-yellow-600 mt-1 sm:mt-2">
+                {stats.montures.pending}
+              </p>
+            </div>
+            <div className="bg-yellow-100 rounded-full p-2 sm:p-3 flex-shrink-0 ml-3">
+              <svg className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        {/* Rejetées */}
+        <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-red-500 hover:shadow-md transition">
+          <div className="flex items-center justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Rejetées</p>
+              <p className="text-2xl sm:text-3xl font-bold text-red-600 mt-1 sm:mt-2">
+                {stats.montures.rejected}
+              </p>
+            </div>
+            <div className="bg-red-100 rounded-full p-2 sm:p-3 flex-shrink-0 ml-3">
+              <svg className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Statistiques Admin Opticiens */}
+      {isAdmin && stats.opticiens && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-purple-500 hover:shadow-md transition">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Montures</p>
-                <p className="text-3xl font-bold text-gray-900 mt-2">{stats.montures.total}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Total Opticiens</p>
+                <p className="text-2xl sm:text-3xl font-bold text-gray-900 mt-1 sm:mt-2">
+                  {stats.opticiens.total}
+                </p>
               </div>
-              <div className="bg-blue-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              <div className="bg-purple-100 rounded-full p-2 sm:p-3 flex-shrink-0 ml-3">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          {/* Approuvées */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-green-500 hover:shadow-md transition">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Approuvées</p>
-                <p className="text-3xl font-bold text-green-600 mt-2">{stats.montures.approved}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Opticiens Approuvés</p>
+                <p className="text-2xl sm:text-3xl font-bold text-green-600 mt-1 sm:mt-2">
+                  {stats.opticiens.approved}
+                </p>
               </div>
-              <div className="bg-green-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-green-100 rounded-full p-2 sm:p-3 flex-shrink-0 ml-3">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          {/* En attente */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-yellow-500 hover:shadow-md transition">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">En attente</p>
-                <p className="text-3xl font-bold text-yellow-600 mt-2">{stats.montures.pending}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">En Attente</p>
+                <p className="text-2xl sm:text-3xl font-bold text-yellow-600 mt-1 sm:mt-2">
+                  {stats.opticiens.pending}
+                </p>
               </div>
-              <div className="bg-yellow-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-yellow-100 rounded-full p-2 sm:p-3 flex-shrink-0 ml-3">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
           </div>
 
-          {/* Rejetées */}
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-4 sm:p-6 border-l-4 border-red-500 hover:shadow-md transition">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Rejetées</p>
-                <p className="text-3xl font-bold text-red-600 mt-2">{stats.montures.rejected}</p>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 truncate">Rejetés</p>
+                <p className="text-2xl sm:text-3xl font-bold text-red-600 mt-1 sm:mt-2">
+                  {stats.opticiens.rejected}
+                </p>
               </div>
-              <div className="bg-red-100 rounded-full p-3">
-                <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="bg-red-100 rounded-full p-2 sm:p-3 flex-shrink-0 ml-3">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
             </div>
           </div>
         </div>
+      )}
 
-        {/* Statistiques Admin Opticiens */}
-        {isAdmin && stats.opticiens && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Total Opticiens</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2">{stats.opticiens.total}</p>
-                </div>
-                <div className="bg-purple-100 rounded-full p-3">
-                  <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm font-medium text-gray-600">Approuvés</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">{stats.opticiens.approved}</p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm font-medium text-gray-600">En attente</p>
-              <p className="text-3xl font-bold text-yellow-600 mt-2">{stats.opticiens.pending}</p>
-            </div>
-
-            <div className="bg-white rounded-lg shadow p-6">
-              <p className="text-sm font-medium text-gray-600">Rejetés</p>
-              <p className="text-3xl font-bold text-red-600 mt-2">{stats.opticiens.rejected}</p>
-            </div>
+      {/* Graphiques */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        {/* Graphique Montures */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Répartition des montures</h3>
           </div>
-        )}
-
-        {/* Graphiques */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Graphique Montures */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition des montures</h3>
+          <div className="p-4 sm:p-6">
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
@@ -261,11 +306,15 @@ const Statistics: React.FC = () => {
               </PieChart>
             </ResponsiveContainer>
           </div>
+        </div>
 
-          {/* Graphique Opticiens (Admin only) */}
-          {isAdmin && stats.opticiens && (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Répartition des opticiens</h3>
+        {/* Graphique Opticiens (Admin only) */}
+        {isAdmin && stats.opticiens && (
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">Répartition des opticiens</h3>
+            </div>
+            <div className="p-4 sm:p-6">
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
@@ -286,101 +335,101 @@ const Statistics: React.FC = () => {
                 </PieChart>
               </ResponsiveContainer>
             </div>
-          )}
-        </div>
-
-        {/* Dernières inscriptions (Admin only) */}
-        {isAdmin && stats.recentOpticiens && stats.recentOpticiens.length > 0 && (
-          <div className="bg-white rounded-lg shadow mb-8">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Dernières inscriptions d'opticiens</h3>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entreprise</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ville</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {stats.recentOpticiens.map((opticien) => (
-                    <tr key={opticien.id}>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          {opticien.prenom} {opticien.nom}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{opticien.email}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{opticien.companyName || 'N/A'}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">{opticien.city || 'N/A'}</div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(opticien.status)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
           </div>
         )}
+      </div>
 
-        {/* Dernières montures ajoutées */}
-        <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Dernières montures ajoutées</h3>
+      {/* Dernières inscriptions (Admin only) */}
+      {isAdmin && stats.recentOpticiens && stats.recentOpticiens.length > 0 && (
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50">
+            <h3 className="text-base sm:text-lg font-semibold text-gray-900">Dernières inscriptions d'opticiens</h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marque</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
-                  {isAdmin && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Propriétaire</th>
-                  )}
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entreprise</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ville</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {stats.recentMontures.map((monture) => (
-                  <tr key={monture.id}>
+                {stats.recentOpticiens.map((opticien) => (
+                  <tr key={opticien.id}>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{monture.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{monture.brand || 'N/A'}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{monture.price.toFixed(2)} MAD</div>
-                    </td>
-                    {isAdmin && monture.owner && (
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-500">
-                          {monture.owner.prenom} {monture.owner.nom}
-                        </div>
-                      </td>
-                    )}
-                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(monture.status)}</td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {new Date(monture.createdAt).toLocaleDateString('fr-FR')}
+                      <div className="text-sm font-medium text-gray-900">
+                        {opticien.prenom} {opticien.nom}
                       </div>
                     </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{opticien.email}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{opticien.companyName || 'N/A'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">{opticien.city || 'N/A'}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(opticien.status)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Dernières montures ajoutées */}
+      <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900">Dernières montures ajoutées</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Marque</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                {isAdmin && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Propriétaire</th>
+                )}
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {stats.recentMontures.map((monture) => (
+                <tr key={monture.id}>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{monture.name}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">{monture.brand || 'N/A'}</div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">{monture.price.toFixed(2)} MAD</div>
+                  </td>
+                  {isAdmin && monture.owner && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-500">
+                        {monture.owner.prenom} {monture.owner.nom}
+                      </div>
+                    </td>
+                  )}
+                  <td className="px-6 py-4 whitespace-nowrap">{getStatusBadge(monture.status)}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-500">
+                      {new Date(monture.createdAt).toLocaleDateString('fr-FR')}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

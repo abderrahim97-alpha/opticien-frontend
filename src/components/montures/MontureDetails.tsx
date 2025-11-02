@@ -47,6 +47,10 @@ const MontureDetails: React.FC = () => {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
   const [statusUpdateLoading, setStatusUpdateLoading] = useState<boolean>(false);
   const [statusMessage, setStatusMessage] = useState<string>('');
+  
+  // ===== NEW STATE FOR READ MORE =====
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState<boolean>(false);
+  const DESCRIPTION_PREVIEW_LENGTH = 200; // Characters to show before "Read More"
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -213,6 +217,62 @@ const MontureDetails: React.FC = () => {
     }
   };
 
+  // ===== NEW FUNCTION FOR RENDERING DESCRIPTION =====
+  const renderDescription = () => {
+    if (!monture?.description) {
+      return <p className="text-gray-500 mb-6">Aucune description disponible</p>;
+    }
+
+    const description = monture.description;
+    const needsReadMore = description.length > DESCRIPTION_PREVIEW_LENGTH;
+
+    if (!needsReadMore) {
+      return <p className="text-lg text-gray-700 leading-relaxed mb-6 whitespace-pre-line">{description}</p>;
+    }
+
+    const displayText = isDescriptionExpanded 
+      ? description 
+      : description.substring(0, DESCRIPTION_PREVIEW_LENGTH) + '...';
+
+    return (
+      <div className="mb-6">
+        <p className="text-lg text-gray-700 leading-relaxed mb-3 whitespace-pre-line">
+          {displayText}
+        </p>
+        <button
+          onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+          className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium transition duration-200 group"
+        >
+          {isDescriptionExpanded ? (
+            <>
+              <span>Voir moins</span>
+              <svg 
+                className="w-5 h-5 ml-1 transform group-hover:-translate-y-0.5 transition-transform" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+              </svg>
+            </>
+          ) : (
+            <>
+              <span>Lire la suite</span>
+              <svg 
+                className="w-5 h-5 ml-1 transform group-hover:translate-y-0.5 transition-transform" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </>
+          )}
+        </button>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
@@ -342,7 +402,7 @@ const MontureDetails: React.FC = () => {
           )}
         </div>
 
-        {/* Details Card */}
+        {/* Details Card - WITH READ MORE FUNCTIONALITY */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
             <svg className="w-6 h-6 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -351,11 +411,8 @@ const MontureDetails: React.FC = () => {
             Description
           </h2>
 
-          {monture.description ? (
-            <p className="text-lg text-gray-700 leading-relaxed mb-6">{monture.description}</p>
-          ) : (
-            <p className="text-gray-500 mb-6">Aucune description disponible</p>
-          )}
+          {/* ===== USING THE NEW RENDER FUNCTION ===== */}
+          {renderDescription()}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-gray-200">
             <div>

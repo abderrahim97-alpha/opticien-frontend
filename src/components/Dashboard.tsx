@@ -306,7 +306,7 @@ const Dashboard: React.FC = () => {
                   <div
                     key={monture.id}
                     className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer gap-2 sm:gap-4"
-                    onClick={() => navigate('/montures')}
+                    onClick={() => navigate(`/montures/${monture.id}`)}
                   >
                     <div className="flex-1 min-w-0">
                       <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">{monture.name}</h3>
@@ -355,7 +355,7 @@ const Dashboard: React.FC = () => {
                     <div
                       key={opticien.id}
                       className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer gap-2 sm:gap-4"
-                      onClick={() => navigate('/opticiens')}
+                      onClick={() => navigate(`/opticiens/${opticien.id}`)}
                     >
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-gray-900 text-sm sm:text-base truncate">
@@ -383,7 +383,7 @@ const Dashboard: React.FC = () => {
                 className="mt-4 w-full text-center text-blue-600 hover:text-blue-800 font-medium text-sm py-2 hover:bg-blue-50 rounded transition"
               >
                 Voir tous les opticiens →
-                            </button>
+              </button>
             </div>
           </div>
         )}
