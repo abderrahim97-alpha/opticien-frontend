@@ -22,6 +22,8 @@ import ResetPassword from './components/authentication/ResetPassword';
 import Statistics from './components/Statistics/Statistics';
 import AdminValidation from './components/Admin/AdminValidation';
 import Dashboard from './components/Dashboard';
+import OrdersPage from './components/Orders/OrdersPage';
+import AdminOrdersPage from './components/Orders/AdminOrdersPage';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -102,6 +104,26 @@ root.render(
             <StatusProtectedRoute requiresApproval={true}>
               <DashboardLayout>
               <AdminValidation />
+              </DashboardLayout>
+            </StatusProtectedRoute>
+          }
+        />
+        <Route
+          path="/orders"
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
+              <OrdersPage />
+              </DashboardLayout>
+            </StatusProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/orders"
+          element={
+            <StatusProtectedRoute requiresApproval={true}>
+              <DashboardLayout>
+              <AdminOrdersPage />
               </DashboardLayout>
             </StatusProtectedRoute>
           }

@@ -265,7 +265,7 @@ const MontureList: React.FC = () => {
                 {monture.images && monture.images.length > 0 ? (
                   <div className="relative h-48 bg-gray-200 overflow-hidden">
                     <img
-                      src={`http://127.0.0.1:8000/uploads/opticiens/${monture.images[0].imageName}`}
+                      src={`http://127.0.0.1:8000/uploads/images/${monture.images[0].imageName}`}
                       alt={monture.name}
                       className="w-full h-full object-cover hover:scale-110 transition"
                       onError={(e) => {

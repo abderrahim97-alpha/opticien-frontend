@@ -465,7 +465,7 @@ const MontureDetails: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {monture.images.map((image, index) => {
-                const imageUrl = `http://127.0.0.1:8000/uploads/opticiens/${image.imageName}`;
+                const imageUrl = `http://127.0.0.1:8000/uploads/images/${image.imageName}`;
 
                 return (
                   <div
@@ -529,7 +529,7 @@ const MontureDetails: React.FC = () => {
               </button>
 
               <img
-                src={`http://127.0.0.1:8000/uploads/opticiens/${monture.images[selectedImageIndex].imageName}`}
+                src={`http://127.0.0.1:8000/uploads/images/${monture.images[selectedImageIndex].imageName}`}
                 alt={`Full view ${selectedImageIndex + 1}`}
                 className="w-full h-auto rounded-lg max-h-[70vh] object-contain"
               />
@@ -566,7 +566,7 @@ const MontureDetails: React.FC = () => {
                       }`}
                     >
                       <img
-                        src={`http://127.0.0.1:8000/uploads/opticiens/${image.imageName}`}
+                        src={`http://127.0.0.1:8000/uploads/images/${image.imageName}`}
                         alt={`Thumbnail ${index + 1}`}
                         className="w-full h-full object-cover"
                       />

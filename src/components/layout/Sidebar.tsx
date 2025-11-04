@@ -54,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
           isOpen ? 'translate-x-0' : '-translate-x-full'
         } lg:translate-x-0`}
       >
-        {/* ✅ Logo Section - Hauteur fixe 80px (h-20) */}
+        {/* Logo Section */}
         <div className="h-20 flex items-center justify-center border-b border-gray-200 px-4 bg-gradient-to-r from-blue-50 to-indigo-50">
           <a 
             href="/dashboard" 
@@ -130,6 +130,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
               </NavLink>
             </li>
 
+            {/* 🆕 Orders Divider */}
+            <li className="pt-4 pb-2">
+              <div className="flex items-center">
+                <div className="flex-1 h-px bg-gray-200"></div>
+                <span className="px-3 text-xs font-semibold text-gray-500 uppercase">Commandes</span>
+                <div className="flex-1 h-px bg-gray-200"></div>
+              </div>
+            </li>
+
+            {/* 🆕 My Orders (Opticien) */}
+            <li>
+              <NavLink to="/orders" className={navLinkClass}>
+                <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span>Mes commandes</span>
+              </NavLink>
+            </li>
+
             {/* Admin Only Section */}
             {isAdmin() && (
               <>
@@ -159,6 +178,16 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span>Validation</span>
+                  </NavLink>
+                </li>
+
+                {/* 🆕 Admin Orders Management */}
+                <li>
+                  <NavLink to="/admin/orders" className={navLinkClass}>
+                    <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    <span>Gestion des commandes</span>
                   </NavLink>
                 </li>
               </>
