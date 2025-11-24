@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../Api/axios';
+import logoImage from '../../assets/opt-Logo.png';
 
 interface CurrentUser {
   id: string;
@@ -53,7 +54,6 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
     }
   };
 
-  // ✅ Fonction de recherche
   const handleSearch = async (query: string) => {
     setSearchQuery(query);
 
@@ -72,7 +72,6 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
 
       const results: SearchResult[] = [];
 
-      // Recherche dans les montures
       const monturesResponse = await api.get('/my-montures', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -92,7 +91,6 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
         });
       });
 
-      // ✅ Si admin, rechercher aussi dans les opticiens
       if (isAdmin()) {
         const opticiensResponse = await api.get('/my-opticiens', {
           headers: { Authorization: `Bearer ${token}` },
@@ -106,10 +104,8 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
         );
 
         filteredOpticiens.forEach((opticien: any) => {
-          // ✅ Extraire l'ID correctement
           let opticienId = opticien.id;
           
-          // Si l'ID est dans "@id" (format IRI)
           if (!opticienId && opticien['@id']) {
             opticienId = opticien['@id'].split('/').pop();
           }
@@ -132,20 +128,16 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
     }
   };
 
-  // ✅ Navigation vers les détails
   const handleResultClick = (result: SearchResult) => {
     setShowSearchResults(false);
     setSearchQuery('');
     
     try {
       if (result.type === 'monture') {
-        // Navigation vers la monture
         navigate(`/montures/${result.id}`);
       } else {
-        // Navigation vers l'opticien
         let opticienId: string | number = result.id;
         
-        // Si l'ID contient des slashes (format IRI), extraire juste l'ID
         if (typeof result.id === 'string' && result.id.includes('/')) {
           const parts = result.id.split('/');
           opticienId = parts[parts.length - 1];
@@ -184,8 +176,8 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
   const getResultIcon = (type: 'monture' | 'opticien') => {
     if (type === 'monture') {
       return (
-        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-          <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
@@ -193,8 +185,8 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
       );
     } else {
       return (
-        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
-          <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg">
+          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
         </div>
@@ -204,22 +196,22 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
 
   const getResultBadge = (type: 'monture' | 'opticien') => {
     if (type === 'monture') {
-      return <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">Monture</span>;
+      return <span className="text-xs px-2.5 py-1 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-full font-bold shadow-lg">Monture</span>;
     } else {
-      return <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">Opticien</span>;
+      return <span className="text-xs px-2.5 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full font-bold shadow-lg">Opticien</span>;
     }
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 fixed w-full z-30 top-0">
-      <div className="h-20 px-4 lg:pl-64 lg:pr-6 flex items-center justify-between">
+    <nav className="backdrop-blur-xl bg-white/10 border-b border-white/20 fixed w-full z-20 top-0 shadow-lg">
+      <div className="h-20 px-4 lg:pl-72 lg:pr-6 flex items-center justify-between">
         
         {/* Left Side */}
         <div className="flex items-center gap-3 flex-1">
           {/* Toggle Button - Mobile Only */}
           <button
             onClick={onToggleSidebar}
-            className="lg:hidden inline-flex items-center justify-center p-2 text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-colors"
+            className="lg:hidden inline-flex items-center justify-center p-2 text-white/80 hover:text-white rounded-xl hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-white/30 transition-all"
             aria-label="Toggle sidebar"
           >
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -234,53 +226,42 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
           {/* Logo Mobile */}
           <a 
             href="/dashboard" 
-            className="lg:hidden flex items-center"
+            className="lg:hidden flex items-center group"
           >
-            <div className="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-md">
-              <svg 
-                className="w-5 h-5 text-white" 
-                fill="none" 
-                stroke="currentColor" 
-                viewBox="0 0 24 24"
-              >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" 
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-xl blur-lg opacity-60 group-hover:opacity-80 transition duration-300" />
+              <div className="relative w-10 h-10 bg-white/10 backdrop-blur-md border-2 border-white/30 rounded-xl flex items-center justify-center shadow-lg">
+                <img 
+                  src={logoImage} 
+                  alt="Optique Marketplace Logo" 
+                  className="w-7 h-7 object-contain drop-shadow-lg"
                 />
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" 
-                />
-              </svg>
+              </div>
             </div>
-            <span className="ml-2 text-lg font-bold text-gray-900">
-              Optique <span className="text-blue-600">Pro</span>
+            <span className="ml-2 text-lg font-black text-white">
+              Opti<span className="text-blue-300">MAROC</span>
             </span>
           </a>
 
-          {/* ✅ Search Bar - Desktop & Mobile */}
+          {/* Search Bar - Desktop & Mobile */}
           <div className="hidden sm:block flex-1 max-w-xl ml-4 lg:ml-8 relative">
-            <div className="relative">
+            <div className="relative group">
               <input
                 type="text"
                 placeholder={isAdmin() ? "Rechercher une monture ou un opticien..." : "Rechercher une monture..."}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 onFocus={() => searchQuery.length >= 2 && setShowSearchResults(true)}
-                className="w-full px-4 py-2 pl-10 pr-10 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-5 py-3 pl-12 pr-12 bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-xl text-white placeholder:text-white/50 focus:border-blue-400 focus:bg-white/15 focus:outline-none focus:ring-4 focus:ring-blue-500/20 transition-all duration-300 font-medium"
               />
-              <svg className="absolute left-3 top-2.5 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg className="absolute left-4 top-3.5 w-5 h-5 text-white/50 group-focus-within:text-blue-300 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               
               {/* Loading spinner */}
               {isSearching && (
-                <div className="absolute right-10 top-2.5">
-                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <div className="absolute right-12 top-3.5">
+                  <div className="w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
                 </div>
               )}
 
@@ -292,29 +273,29 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
                     setSearchResults([]);
                     setShowSearchResults(false);
                   }}
-                  className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600 transition"
+                  className="absolute right-4 top-3.5 text-white/50 hover:text-white transition"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               )}
             </div>
 
-            {/* ✅ Search Results Dropdown */}
+            {/* Search Results Dropdown */}
             {showSearchResults && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 py-2 max-h-96 overflow-y-auto z-50">
+              <div className="absolute top-full left-0 right-0 mt-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl py-2 max-h-96 overflow-y-auto z-50">
                 {searchResults.length === 0 && !isSearching ? (
-                  <div className="py-8 text-center">
-                    <svg className="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="py-12 text-center">
+                    <svg className="w-12 h-12 mx-auto text-white/30 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
-                    <p className="text-sm text-gray-500">Aucun résultat pour "{searchQuery}"</p>
+                    <p className="text-sm text-white/70 font-semibold">Aucun résultat pour "{searchQuery}"</p>
                   </div>
                 ) : (
                   <>
                     {searchResults.length > 0 && (
-                      <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase border-b sticky top-0 bg-white">
+                      <div className="px-4 py-2 text-xs font-bold text-blue-200 uppercase border-b border-white/10 sticky top-0 backdrop-blur-xl bg-white/5">
                         {searchResults.length} résultat{searchResults.length > 1 ? 's' : ''}
                       </div>
                     )}
@@ -322,18 +303,18 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
                       <button
                         key={`${result.type}-${result.id}-${index}`}
                         onClick={() => handleResultClick(result)}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center gap-3 transition"
+                        className="w-full text-left px-4 py-3 hover:bg-white/10 flex items-center gap-3 transition-all duration-200"
                       >
                         {getResultIcon(result.type)}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
-                            <p className="text-sm font-medium text-gray-900 truncate">{result.name}</p>
+                            <p className="text-sm font-bold text-white truncate">{result.name}</p>
                             {getResultBadge(result.type)}
                           </div>
-                          <p className="text-xs text-gray-500 truncate">{result.subtitle}</p>
+                          <p className="text-xs text-white/60 truncate">{result.subtitle}</p>
                         </div>
-                        <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        <svg className="w-5 h-5 text-white/40 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
                         </svg>
                       </button>
                     ))}
@@ -345,23 +326,23 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
         </div>
 
         {/* Right Side */}
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="flex items-center gap-3">
           {/* Search Icon Mobile */}
           <button 
-            className="sm:hidden p-2 text-gray-500 rounded-lg hover:bg-gray-100 transition-colors"
+            className="sm:hidden p-2 text-white/80 hover:text-white rounded-xl hover:bg-white/10 transition-all"
             onClick={() => {
               alert('Recherche mobile - À implémenter si besoin');
             }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </button>
 
           {/* Admin Badge */}
           {isAdmin() && (
-            <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-              <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+            <span className="hidden sm:inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50">
+              <svg className="w-3 h-3 mr-1.5" fill="currentColor" viewBox="0 0 20 20">
                 <path 
                   fillRule="evenodd" 
                   d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" 
@@ -374,41 +355,42 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
 
           {/* User Menu */}
           <div className="relative">
-            <button onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+            <button 
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-white/10 transition-all"
               aria-label="User menu"
             >
-              <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-blue-500/50">
                 {getUserInitials()}
               </div>
               <div className="hidden lg:block text-left mr-1">
-                <p className="text-sm font-medium text-gray-900 leading-tight">{getUserDisplayName()}</p>
-                <p className="text-xs text-gray-500 leading-tight">
+                <p className="text-sm font-bold text-white leading-tight">{getUserDisplayName()}</p>
+                <p className="text-xs text-white/60 leading-tight">
                   {isAdmin() ? 'Administrateur' : 'Opticien'}
                 </p>
               </div>
-              <svg className="hidden lg:block w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <svg className="hidden lg:block w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
 
             {/* Dropdown Menu */}
             {showUserMenu && (
-              <div className="absolute right-0 mt-2 w-56 sm:w-64 bg-white rounded-lg shadow-xl border border-gray-200 py-2 z-50">
-                <div className="px-4 py-3 border-b border-gray-200 lg:hidden">
-                  <p className="text-sm font-medium text-gray-900 truncate">
+              <div className="absolute right-0 mt-2 w-64 backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl shadow-2xl py-2 z-50">
+                <div className="px-4 py-3 border-b border-white/10 lg:hidden">
+                  <p className="text-sm font-bold text-white truncate">
                     {getUserDisplayName()}
                   </p>
-                  <p className="text-xs text-gray-500 truncate mt-0.5">
+                  <p className="text-xs text-white/70 truncate mt-0.5">
                     {user?.email}
                   </p>
                   {user?.status && (
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium mt-2 ${
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold mt-2 ${
                       user.status.toLowerCase() === 'approved' 
-                        ? 'bg-green-100 text-green-800' 
+                        ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white shadow-lg' 
                         : user.status.toLowerCase() === 'pending'
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg'
+                        : 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg'
                     }`}>
                       {user.status}
                     </span>
@@ -420,10 +402,10 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
                     setShowUserMenu(false);
                     navigate('/dashboard');
                   }}
-                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center transition-colors"
+                  className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 flex items-center transition-all font-semibold"
                 >
                   <svg 
-                    className="w-4 h-4 mr-3 text-gray-400 flex-shrink-0" 
+                    className="w-5 h-5 mr-3 text-white/70 flex-shrink-0" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -443,10 +425,10 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
                     setShowUserMenu(false);
                     navigate('/ProfileSettings');
                   }}
-                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center transition-colors"
+                  className="w-full text-left px-4 py-3 text-sm text-white hover:bg-white/10 flex items-center transition-all font-semibold"
                 >
                   <svg 
-                    className="w-4 h-4 mr-3 text-gray-400 flex-shrink-0" 
+                    className="w-5 h-5 mr-3 text-white/70 flex-shrink-0" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -455,7 +437,7 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
                       strokeLinecap="round" 
                       strokeLinejoin="round" 
                       strokeWidth={2} 
-                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
+                      d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 ThisExpressionIsNotCallable.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" 
                     />
                     <path 
                       strokeLinecap="round" 
@@ -467,14 +449,14 @@ const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar, isSidebarOpen }) => {
                   Paramètres du compte
                 </button>
 
-                <div className="border-t border-gray-200 my-2"></div>
+                <div className="border-t border-white/10 my-2"></div>
 
                 <button
                   onClick={handleLogout}
-                  className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center transition-colors"
+                  className="w-full text-left px-4 py-3 text-sm text-red-300 hover:bg-red-500/20 flex items-center transition-all font-bold"
                 >
                   <svg 
-                    className="w-4 h-4 mr-3 flex-shrink-0" 
+                    className="w-5 h-5 mr-3 flex-shrink-0" 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
