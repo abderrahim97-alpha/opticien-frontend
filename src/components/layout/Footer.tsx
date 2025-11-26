@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
           {/* Brand */}
           <div className="mb-6 sm:mb-0">
             <a 
-              href="/montures" 
+              href="/dashboard" 
               className="flex items-center group"
             >
               <div className="relative">

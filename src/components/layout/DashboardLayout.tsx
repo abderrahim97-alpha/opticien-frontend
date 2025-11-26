@@ -26,13 +26,13 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       {/* Navbar - z-40 */}
       <Navbar onToggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
 
-      {/* Sidebar - z-40 */}
+      {/* Sidebar - z-30 */}
       <Sidebar isOpen={isSidebarOpen} />
 
-      {/* Overlay pour mobile - z-30 */}
+      {/* Overlay pour mobile - z-35 */}
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
+          className="fixed inset-0 z-35 bg-black/60 backdrop-blur-sm lg:hidden"
           onClick={toggleSidebar}
         />
       )}
@@ -51,8 +51,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         <Footer />
       </div>
 
-      {/* Additional CSS for animations */}
+      {/* Portal container for modals/lightbox - AJOUTEZ CECI */}
+      <div id="modal-root" className="relative z-[9999]"></div>
+
+      {/* Additional CSS for animations and z-index */}
       <style>{`
+        .z-35 {
+          z-index: 35;
+        }
         @keyframes blob {
           0% {
             transform: translate(0px, 0px) scale(1);

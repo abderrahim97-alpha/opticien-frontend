@@ -47,11 +47,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
     }`;
 
   return (
-    <aside
-      className={`fixed top-0 left-0 z-30 w-72 h-screen backdrop-blur-xl bg-white/10 border-r border-white/20 transition-transform ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      } lg:translate-x-0 shadow-2xl`}
-    >
+      <aside
+        className={`fixed top-0 left-0 z-50 w-72 h-screen backdrop-blur-xl bg-white/10 border-r border-white/20 transition-transform ${
+          isOpen ? 'translate-x-0' : '-translate-x-full'
+        } lg:translate-x-0 shadow-2xl`}
+      >
       {/* Logo Section */}
       <div className="h-20 flex items-center justify-center border-b border-white/20 px-4">
         <a 
