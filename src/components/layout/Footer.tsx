@@ -111,7 +111,7 @@ const Footer: React.FC = () => {
           </a>
           <span className="text-white/30">•</span>
           <a 
-            href="mailto:support@optique.ma" 
+            href="/contact" 
             className="relative text-white/70 hover:text-white font-medium transition-colors duration-300 group inline-flex items-center"
           >
             <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

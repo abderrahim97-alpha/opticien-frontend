@@ -377,7 +377,7 @@ const Dashboard: React.FC = () => {
               <div className="relative backdrop-blur-xl bg-white/10 border border-white/20 rounded-2xl p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-red-200 text-sm font-semibold uppercase tracking-wide">Rejetés</p>
+                    <p className="text-red-200 text-sm font-semibold uppercase tracking-wide">Rejetées</p>
                     <p className="text-4xl font-black text-white mt-2">{stats.opticiens.rejected}</p>
                   </div>
                   <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">

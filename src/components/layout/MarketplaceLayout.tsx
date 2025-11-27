@@ -369,10 +369,10 @@ const MarketplaceLayout: React.FC<MarketplaceLayoutProps> = ({ children }) => {
               </a>
               <span className="text-white/30">•</span>
               <a 
-                href="#" 
+                href="/contact" 
                 className="relative text-white/70 hover:text-white font-medium transition-colors duration-300 group"
               >
-                <span>Support</span>
+                <span>Contact</span>
                 <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-indigo-400 group-hover:w-full transition-all duration-300" />
               </a>
             </div>

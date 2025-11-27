@@ -27,6 +27,7 @@ import AdminValidation from './components/Admin/AdminValidation';
 import Dashboard from './components/Dashboard';
 import OrdersPage from './components/Orders/OrdersPage';
 import AdminOrdersPage from './components/Orders/AdminOrdersPage';
+import 'leaflet/dist/leaflet.css';
 
 // Marketplace imports
 import MarketplacePage from './components/Marketplace/MarketplacePage';
@@ -34,6 +35,7 @@ import ProductDetailPage from './components/Marketplace/ProductDetailPage';
 import CartPage from './components/Marketplace/CartPage';
 import CheckoutPage from './components/Marketplace/CheckoutPage';
 import { CartProvider } from './context/CartContext';
+import ContactPage from './components/contact/ContactPage';
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
@@ -139,6 +141,16 @@ root.render(
               <StatusProtectedRoute requiresApproval={true}>
                 <DashboardLayout>
                   <Dashboard />
+                </DashboardLayout>
+              </StatusProtectedRoute>
+            }
+          />
+          <Route
+            path="/contact"
+            element={
+              <StatusProtectedRoute requiresApproval={true}>
+                <DashboardLayout>
+                  <ContactPage />
                 </DashboardLayout>
               </StatusProtectedRoute>
             }

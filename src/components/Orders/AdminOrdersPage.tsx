@@ -149,22 +149,31 @@ const AdminOrdersPage: React.FC = () => {
   const handleValidate = async () => {
     if (!selectedOrder) return;
 
-    try {
-      const token = localStorage.getItem('token');
-      await api.put(`/admin/orders/${selectedOrder.id}/validate`, 
-        { noteAdmin: adminNote },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const token = localStorage.getItem('token');
 
+    try {
+      await api.put(
+        `/admin/orders/${selectedOrder.id}/validate`, 
+        { noteAdmin: adminNote },
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          validateStatus: (status) => status < 600 // ✅ Accepter même les 500
+        }
+      );
+    } catch (error: any) {
+      console.error('Erreur lors de la validation:', error);
+    } finally {
+      // ✅ Toujours exécuter ces actions
       setShowValidateModal(false);
       setShowDetailsModal(false);
       setAdminNote('');
       setSelectedOrder(null);
-      if (token) fetchData(token);
+      
+      if (token) {
+        await fetchData(token);
+      }
+      
       alert('Commande validée avec succès !');
-    } catch (error) {
-      console.error('Erreur lors de la validation:', error);
-      alert('Erreur lors de la validation de la commande');
     }
   };
 
@@ -174,22 +183,31 @@ const AdminOrdersPage: React.FC = () => {
       return;
     }
 
-    try {
-      const token = localStorage.getItem('token');
-      await api.put(`/admin/orders/${selectedOrder.id}/refuse`, 
-        { raison: refuseReason },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+    const token = localStorage.getItem('token');
 
+    try {
+      await api.put(
+        `/admin/orders/${selectedOrder.id}/refuse`, 
+        { raison: refuseReason },
+        { 
+          headers: { Authorization: `Bearer ${token}` },
+          validateStatus: (status) => status < 600 // ✅ Accepter même les 500
+        }
+      );
+    } catch (error: any) {
+      console.error('Erreur lors du refus:', error);
+    } finally {
+      // ✅ Toujours exécuter ces actions
       setShowRefuseModal(false);
       setShowDetailsModal(false);
       setRefuseReason('');
       setSelectedOrder(null);
-      if (token) fetchData(token);
+      
+      if (token) {
+        await fetchData(token);
+      }
+      
       alert('Commande refusée et stock restauré !');
-    } catch (error) {
-      console.error('Erreur lors du refus:', error);
-      alert('Erreur lors du refus de la commande');
     }
   };
 
@@ -260,7 +278,7 @@ const AdminOrdersPage: React.FC = () => {
     );
   };
 
-  // Modal Details avec Portal
+  // ✅ UNIQUEMENT DetailsModal utilise createPortal avec z-[9999]
   const DetailsModal = () => {
     if (!showDetailsModal || !selectedOrder) return null;
 
@@ -270,7 +288,7 @@ const AdminOrdersPage: React.FC = () => {
     return createPortal(
       <div
         className="fixed inset-0 z-[9999] overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
-        onMouseDown={(e) => {
+        onClick={(e) => {
           if (e.target === e.currentTarget) {
             setShowDetailsModal(false);
             setSelectedOrder(null);
@@ -279,7 +297,7 @@ const AdminOrdersPage: React.FC = () => {
       >
         <div 
           className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden"
-          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         >
           <div className="backdrop-blur-xl bg-slate-900/95 border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
             {/* Modal Header */}
@@ -298,8 +316,7 @@ const AdminOrdersPage: React.FC = () => {
                   </p>
                 </div>
                 <button
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
+                  onClick={() => {
                     setShowDetailsModal(false);
                     setSelectedOrder(null);
                   }}
@@ -427,7 +444,7 @@ const AdminOrdersPage: React.FC = () => {
                     <svg className="w-6 h-6 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                        <span className="text-lg font-bold text-white">Total de la commande</span>
+                    <span className="text-lg font-bold text-white">Total de la commande</span>
                   </div>
                   <span className="text-3xl font-black text-blue-300">
                     {parseFloat(selectedOrder.totalPrice).toFixed(2)} MAD
@@ -439,8 +456,7 @@ const AdminOrdersPage: React.FC = () => {
               {selectedOrder.status === 'pending' && (
                 <div className="flex gap-3 pt-4">
                   <button
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
+                    onClick={() => {
                       setShowDetailsModal(false);
                       setShowValidateModal(true);
                     }}
@@ -452,8 +468,7 @@ const AdminOrdersPage: React.FC = () => {
                     Valider la commande
                   </button>
                   <button
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
+                    onClick={() => {
                       setShowDetailsModal(false);
                       setShowRefuseModal(true);
                     }}
@@ -471,8 +486,7 @@ const AdminOrdersPage: React.FC = () => {
             {/* Modal Footer */}
             <div className="bg-white/5 px-6 py-4 border-t border-white/20 flex justify-end">
               <button
-                onMouseDown={(e) => {
-                  e.stopPropagation();
+                onClick={() => {
                   setShowDetailsModal(false);
                   setSelectedOrder(null);
                 }}
@@ -480,200 +494,6 @@ const AdminOrdersPage: React.FC = () => {
               >
                 Fermer
               </button>
-            </div>
-          </div>
-        </div>
-      </div>,
-      modalRoot
-    );
-  };
-
-  // Modal Validate avec Portal
-  const ValidateModal = () => {
-    if (!showValidateModal || !selectedOrder) return null;
-
-    const modalRoot = document.getElementById('modal-root');
-    if (!modalRoot) return null;
-
-    return createPortal(
-      <div
-        className="fixed inset-0 z-[9999] overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
-        onMouseDown={(e) => {
-          if (e.target === e.currentTarget) {
-            setShowValidateModal(false);
-            setAdminNote('');
-          }
-        }}
-      >
-        <div 
-          className="relative w-full max-w-md"
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          <div className="backdrop-blur-xl bg-slate-900/95 border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <h2 className="text-xl font-black text-white">Valider la commande</h2>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6">
-              <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-4 mb-4">
-                <p className="text-white mb-2">
-                  Êtes-vous sûr de vouloir valider la commande <span className="font-bold">#{selectedOrder.id}</span> de{' '}
-                  <span className="font-bold">{selectedOrder.acheteur.prenom} {selectedOrder.acheteur.nom}</span> ?
-                </p>
-                <p className="text-sm text-white/70">
-                  Montant total: <span className="font-bold text-white">{parseFloat(selectedOrder.totalPrice).toFixed(2)} MAD</span>
-                </p>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-bold text-white mb-2">
-                  Note admin (optionnelle)
-                </label>
-                <textarea
-                  value={adminNote}
-                  onChange={(e) => setAdminNote(e.target.value)}
-                  rows={3}
-                  className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder:text-white/50 focus:border-green-400 focus:bg-white/15 focus:outline-none focus:ring-4 focus:ring-green-500/20 transition-all duration-300"
-                  placeholder="Ajouter une note pour l'acheteur..."
-                />
-              </div>
-
-              <div className="flex justify-end gap-3">
-                <button
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    setShowValidateModal(false);
-                    setAdminNote('');
-                  }}
-                  className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all duration-200"
-                >
-                  Annuler
-                </button>
-                <button
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    handleValidate();
-                  }}
-                  className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-xl font-bold transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-green-500/50"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                  </svg>
-                  Valider
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>,
-      modalRoot
-    );
-  };
-
-  // Modal Refuse avec Portal
-  const RefuseModal = () => {
-    if (!showRefuseModal || !selectedOrder) return null;
-
-    const modalRoot = document.getElementById('modal-root');
-    if (!modalRoot) return null;
-
-    return createPortal(
-      <div
-        className="fixed inset-0 z-[9999] overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
-        onMouseDown={(e) => {
-          if (e.target === e.currentTarget) {
-            setShowRefuseModal(false);
-            setRefuseReason('');
-          }
-        }}
-      >
-        <div 
-          className="relative w-full max-w-md"
-          onMouseDown={(e) => e.stopPropagation()}
-        >
-          <div className="backdrop-blur-xl bg-slate-900/95 border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
-            {/* Modal Header */}
-            <div className="bg-gradient-to-r from-red-600 to-pink-600 p-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                  <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <h2 className="text-xl font-black text-white">Refuser la commande</h2>
-              </div>
-            </div>
-
-            {/* Modal Body */}
-            <div className="p-6">
-              <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-4 mb-4">
-                <p className="text-white mb-2">
-                  Refuser la commande <span className="font-bold">#{selectedOrder.id}</span> ?
-                </p>
-                <p className="text-sm font-bold text-red-300 flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  Le stock sera automatiquement restauré
-                </p>
-              </div>
-              
-              <div className="mb-4">
-                <label className="block text-sm font-bold text-white mb-2">
-                  Raison du refus <span className="text-red-400">*</span>
-                </label>
-                <textarea
-                  value={refuseReason}
-                  onChange={(e) => setRefuseReason(e.target.value)}
-                  rows={4}
-                  className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder:text-white/50 focus:border-red-400 focus:bg-white/15 focus:outline-none focus:ring-4 focus:ring-red-500/20 transition-all duration-300"
-                  placeholder="Expliquer clairement la raison du refus à l'acheteur..."
-                  required
-                />
-                {!refuseReason.trim() && (
-                  <p className="text-xs text-red-300 mt-2 flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    Ce champ est obligatoire
-                  </p>
-                )}
-              </div>
-
-              <div className="flex justify-end gap-3">
-                <button
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    setShowRefuseModal(false);
-                    setRefuseReason('');
-                  }}
-                  className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all duration-200"
-                >
-                  Annuler
-                </button>
-                <button
-                  onMouseDown={(e) => {
-                    e.stopPropagation();
-                    handleRefuse();
-                  }}
-                  disabled={!refuseReason.trim()}
-                  className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white rounded-xl font-bold transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-red-600 disabled:hover:to-pink-600"
-                >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                  </svg>
-                  Refuser
-                </button>
-              </div>
             </div>
           </div>
         </div>
@@ -1041,10 +861,162 @@ const AdminOrdersPage: React.FC = () => {
         `}</style>
       </div>
 
-      {/* Modaux rendus via Portal */}
+      {/* ✅ DetailsModal avec Portal et z-[9999] */}
       <DetailsModal />
-      <ValidateModal />
-      <RefuseModal />
+
+      {/* ✅ Validate Modal - Sans Portal, avec z-50 (comme votre ancien code) */}
+      {showValidateModal && selectedOrder && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="relative w-full max-w-md">
+            <div className="backdrop-blur-xl bg-slate-900/95 border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-green-600 to-emerald-600 p-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-black text-white">Valider la commande</h2>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6">
+                <div className="bg-green-500/10 border border-green-400/30 rounded-xl p-4 mb-4">
+                  <p className="text-white mb-2">
+                    Êtes-vous sûr de vouloir valider la commande <span className="font-bold">#{selectedOrder.id}</span> de{' '}
+                    <span className="font-bold">{selectedOrder.acheteur.prenom} {selectedOrder.acheteur.nom}</span> ?
+                  </p>
+                  <p className="text-sm text-white/70">
+                    Montant total: <span className="font-bold text-white">{parseFloat(selectedOrder.totalPrice).toFixed(2)} MAD</span>
+                  </p>
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-bold text-white mb-2">
+                    Note admin (optionnelle)
+                  </label>
+                  <textarea
+                    value={adminNote}
+                    onChange={(e) => setAdminNote(e.target.value)}
+                    rows={3}
+                    className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder:text-white/50 focus:border-green-400 focus:bg-white/15 focus:outline-none focus:ring-4 focus:ring-green-500/20 transition-all duration-300"
+                    placeholder="Ajouter une note pour l'acheteur..."
+                    autoFocus
+                  />
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setShowValidateModal(false);
+                      setAdminNote('');
+                    }}
+                    type="button"
+                    className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all duration-200"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleValidate}
+                    type="button"
+                    className="px-6 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 text-white rounded-xl font-bold transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-green-500/50"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    Valider
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ Refuse Modal - Sans Portal, avec z-50 (comme votre ancien code) */}
+      {showRefuseModal && selectedOrder && (
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="relative w-full max-w-md">
+            <div className="backdrop-blur-xl bg-slate-900/95 border border-white/20 rounded-2xl shadow-2xl overflow-hidden">
+              {/* Modal Header */}
+              <div className="bg-gradient-to-r from-red-600 to-pink-600 p-6">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                    <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <h2 className="text-xl font-black text-white">Refuser la commande</h2>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6">
+                <div className="bg-red-500/10 border border-red-400/30 rounded-xl p-4 mb-4">
+                  <p className="text-white mb-2">
+                    Refuser la commande <span className="font-bold">#{selectedOrder.id}</span> ?
+                  </p>
+                  <p className="text-sm font-bold text-red-300 flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    Le stock sera automatiquement restauré
+                  </p>
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-bold text-white mb-2">
+                    Raison du refus <span className="text-red-400">*</span>
+                  </label>
+                  <textarea
+                    value={refuseReason}
+                    onChange={(e) => setRefuseReason(e.target.value)}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder:text-white/50 focus:border-red-400 focus:bg-white/15 focus:outline-none focus:ring-4 focus:ring-red-500/20 transition-all duration-300"
+                    placeholder="Expliquer clairement la raison du refus à l'acheteur..."
+                    required
+                    autoFocus
+                  />
+                  {!refuseReason.trim() && (
+                    <p className="text-xs text-red-300 mt-2 flex items-center gap-1">
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      Ce champ est obligatoire
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setShowRefuseModal(false);
+                      setRefuseReason('');
+                    }}
+                    type="button"
+                    className="px-6 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-xl font-bold transition-all duration-200"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleRefuse}
+                    type="button"
+                    disabled={!refuseReason.trim()}
+                    className="px-6 py-2.5 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white rounded-xl font-bold transition-all duration-200 flex items-center gap-2 shadow-lg hover:shadow-red-500/50 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:from-red-600 disabled:hover:to-pink-600"
+                  >
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                    Refuser
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
